@@ -19,6 +19,26 @@ const int    wardCapacity[NUM_WARDS]  = {20, 10, 10, 5};
 int bedOccupancy[NUM_WARDS][MAX_BEDS_PER_WARD];
 int specialtyQueueCount[NUM_SPECIALTIES] = {0, 0, 0, 0};
 
+/*  PATIENT ARRAYS  */
+char   patientName[MAX_PATIENTS][NAME_LEN];
+int    patientAge[MAX_PATIENTS];
+int    patientUrgency[MAX_PATIENTS];
+int    patientSpecialtyIdx[MAX_PATIENTS];
+int    patientIsAdmitted[MAX_PATIENTS];
+int    patientWardIdx[MAX_PATIENTS];
+int    patientBedNumber[MAX_PATIENTS];
+int    patientDaysAdmitted[MAX_PATIENTS];
+
+double patientBaseFee[MAX_PATIENTS];
+double patientSurcharge[MAX_PATIENTS];
+double patientWardCost[MAX_PATIENTS];
+double patientGrossTotal[MAX_PATIENTS];
+double patientDiscount[MAX_PATIENTS];
+double patientFinalAmount[MAX_PATIENTS];
+double patientWaitTime[MAX_PATIENTS];
+
+int patientCount = 0;
+
 void showMainMenu(void) {
     printf("\n============ SMART HOSPITAL SYSTEM ============\n");
     printf("1. Register New Patient\n");
