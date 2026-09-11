@@ -12,7 +12,7 @@
 #define RECORDS_FILE      "patient_records.txt"
 
 //LOOKUP DATA Requirement 1
-   Parallel arrays: index 0 -> Specialty ID 1, index 1 -> ID 2, etc. */
+// Parallel arrays: index 0 -> Specialty ID 1, index 1 -> ID 2, etc.
 extern const char  specialtyName[NUM_SPECIALTIES][30];
 extern const double specialtyBaseFee[NUM_SPECIALTIES];
 extern const int    specialtyConsultTime[NUM_SPECIALTIES];  // minutes
