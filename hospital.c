@@ -18,3 +18,14 @@ const int    wardCapacity[NUM_WARDS]  = {20, 10, 10, 5};
 
 int bedOccupancy[NUM_WARDS][MAX_BEDS_PER_WARD];
 int specialtyQueueCount[NUM_SPECIALTIES] = {0, 0, 0, 0};
+
+void showMainMenu(void) {
+    printf("\n============ SMART HOSPITAL SYSTEM ============\n");
+    printf("1. Register New Patient\n");
+    printf("2. View Bed Occupancy Matrix\n");
+    printf("3. View Patients by Priority (Triage Sort)\n");
+    printf("4. Generate Performance Reports\n");
+    printf("5. Save & Exit\n");
+    printf("=================================================\n");
+    printf("Enter your choice: ");
+}
