@@ -49,3 +49,54 @@ void showMainMenu(void) {
     printf("=================================================\n");
     printf("Enter your choice: ");
 }
+void registerPatient(void) {
+    int idx, specialtyChoice, wardChoice, admitted;
+
+    if (patientCount >= MAX_PATIENTS) {
+        printf("Patient limit reached. Cannot register more patients.\n");
+        return;
+    }
+    idx = patientCount;
+
+    printf("\n--- New Patient Registration ---\n");
+    printf("Patient Name: ");
+    getchar(); /* clears leftover newline sitting in the input buffer from the menu's scanf */
+    fgets(patientName[idx], NAME_LEN, stdin);
+    patientName[idx][strcspn(patientName[idx], "\n")] = '\0'; /* strip the trailing newline fgets keeps */
+
+    printf("Patient Age: ");
+    scanf("%d", &patientAge[idx]);
+
+    printf("Triage Level (1 = Normal, 2 = Urgent, 3 = Critical): ");
+    scanf("%d", &patientUrgency[idx]);
+
+    printf("\nAvailable Specialties:\n");
+    for (int i = 0; i < NUM_SPECIALTIES; i++)
+        printf("  %d. %s (LKR %.2f)\n", i + 1, specialtyName[i], specialtyBaseFee[i]);
+    printf("Select Specialty ID (1-4): ");
+    scanf("%d", &specialtyChoice);
+    patientSpecialtyIdx[idx] = specialtyChoice - 1;
+
+    printf("Is Admitted to Ward? (1 = Yes, 0 = No): ");
+    scanf("%d", &admitted);
+    patientIsAdmitted[idx] = admitted;
+
+    if (admitted == 1) {
+        printf("\nAvailable Wards:\n");
+        for (int i = 0; i < NUM_WARDS; i++)
+            printf("  %d. %s (LKR %.2f/day)\n", i + 1, wardName[i], wardDailyRate[i]);
+        printf("Select Ward ID (1-4): ");
+        scanf("%d", &wardChoice);
+        patientWardIdx[idx] = wardChoice - 1;
+
+        printf("Days Admitted: ");
+        scanf("%d", &patientDaysAdmitted[idx]);
+    } else {
+        patientWardIdx[idx] = -1;
+        patientDaysAdmitted[idx] = 0;
+    }
+
+    patientCount++;
+
+    printf("\nPatient registered. (Bed assignment and billing come in the next steps.)\n");
+}

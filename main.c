@@ -12,7 +12,7 @@ int main(void) {
 
         switch (choice) {
             case 1:
-                printf("\n[Register Patient - not implemented yet]\n");
+                registerPatient();
                 break;
             case 2:
                 printf("\n[View Bed Occupancy - not implemented yet]\n");
