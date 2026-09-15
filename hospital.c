@@ -62,7 +62,18 @@ int assignBed(int wardIdx) {
     }
     return -1;
 }
+/* Requirement 3.1: Wait Time = current queue count for this specialty * avg time per patient.
+   Uses the count BEFORE this patient is added, so the first patient always waits 0 mins. */
+double calculateWaitTime(int specialtyIdx) {
+    return specialtyQueueCount[specialtyIdx] * specialtyConsultTime[specialtyIdx];
+}
 
+/* Requirement 3.2: Emergency Surcharge based on urgency level */
+double calculateSurcharge(int urgencyLevel, double baseFee) {
+    if (urgencyLevel == 2) return baseFee * 0.20;
+    if (urgencyLevel == 3) return baseFee * 0.50;
+    return 0.0;
+}
 void registerPatient(void) {
     int idx, specialtyChoice, wardChoice, admitted;
 
@@ -122,7 +133,12 @@ void registerPatient(void) {
         patientBedNumber[idx] = -1;
         patientDaysAdmitted[idx] = 0;
     }
+        patientWaitTime[idx]  = calculateWaitTime(patientSpecialtyIdx[idx]);
+    patientBaseFee[idx]   = specialtyBaseFee[patientSpecialtyIdx[idx]];
+    patientSurcharge[idx] = calculateSurcharge(patientUrgency[idx], patientBaseFee[idx]);
 
+    /* Increment queue count AFTER calculating wait time, per spec */
+    specialtyQueueCount[patientSpecialtyIdx[idx]]++;
     patientCount++;
 
     printf("\nPatient registered. (Bed assignment and billing come in the next steps.)\n");
