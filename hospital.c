@@ -49,6 +49,20 @@ void showMainMenu(void) {
     printf("=================================================\n");
     printf("Enter your choice: ");
 }
+
+/* Finds first free bed in the given ward, marks it occupied, returns its index (0-based).
+   Returns -1 if the ward is full. */
+int assignBed(int wardIdx) {
+    int b;
+    for (b = 0; b < wardCapacity[wardIdx]; b++) {
+        if (bedOccupancy[wardIdx][b] == 0) {
+            bedOccupancy[wardIdx][b] = 1;
+            return b;
+        }
+    }
+    return -1;
+}
+
 void registerPatient(void) {
     int idx, specialtyChoice, wardChoice, admitted;
 
@@ -91,8 +105,21 @@ void registerPatient(void) {
 
         printf("Days Admitted: ");
         scanf("%d", &patientDaysAdmitted[idx]);
+
+        int bedIdx = assignBed(patientWardIdx[idx]);
+        if (bedIdx == -1) {
+            printf("\nSorry, %s is FULL. Patient registered as outpatient instead.\n",
+                   wardName[patientWardIdx[idx]]);
+            patientIsAdmitted[idx] = 0;
+            patientWardIdx[idx] = -1;
+            patientBedNumber[idx] = -1;
+            patientDaysAdmitted[idx] = 0;
+        } else {
+            patientBedNumber[idx] = bedIdx;
+        }
     } else {
         patientWardIdx[idx] = -1;
+        patientBedNumber[idx] = -1;
         patientDaysAdmitted[idx] = 0;
     }
 

@@ -35,7 +35,7 @@ extern int    patientUrgency[MAX_PATIENTS];      // 1,2,3
 extern int    patientSpecialtyIdx[MAX_PATIENTS]; // 0-based index into specialty arrays
 extern int    patientIsAdmitted[MAX_PATIENTS];   // 1 = yes, 0 = no
 extern int    patientWardIdx[MAX_PATIENTS];      // 0-based index, -1 if not admitted
-extern int    patientBedNumber[MAX_PATIENTS];    // 0-based bed index assigned -1 if none
+extern int    patientBedNumber[MAX_PATIENTS];    // 0-based bed index assigned, -1 if none
 extern int    patientDaysAdmitted[MAX_PATIENTS];
 
 // Calculated billing fields
@@ -79,5 +79,3 @@ void sortPatientsByPriority(int order[]);
 const char* urgencyLabel(int level);
 
 #endif
-
-
