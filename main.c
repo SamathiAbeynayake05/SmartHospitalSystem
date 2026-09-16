@@ -15,8 +15,8 @@ int main(void) {
                 registerPatient();
                 break;
             case 2:
-                printf("\n[View Bed Occupancy - not implemented yet]\n");
-                break;
+    viewBedOccupancy();
+    break;
             case 3:
                 printf("\n[View Sorted Patients - not implemented yet]\n");
                 break;

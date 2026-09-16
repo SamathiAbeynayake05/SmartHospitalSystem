@@ -146,6 +146,23 @@ void displayBill(int idx) {
         printf("Estimated Waiting Time: %.2f mins\n", patientWaitTime[idx]);
     printf("====================================================\n\n");
 }
+/* Requirement 1: display the bed occupancy matrix */
+void viewBedOccupancy(void) {
+    int w, b, occupied;
+
+    printf("\n============ BED OCCUPANCY MATRIX ============\n");
+    for (w = 0; w < NUM_WARDS; w++) {
+        occupied = 0;
+        printf("\n%s (Capacity: %d)\n  ", wardName[w], wardCapacity[w]);
+        for (b = 0; b < wardCapacity[w]; b++) {
+            printf("[%d]", bedOccupancy[w][b]);
+            if (bedOccupancy[w][b] == 1) occupied++;
+        }
+        printf("\n  Occupied: %d / %d (%.1f%%)\n", occupied, wardCapacity[w],
+               (occupied * 100.0) / wardCapacity[w]);
+    }
+    printf("================================================\n");
+}
 void registerPatient(void) {
     int idx, specialtyChoice, wardChoice, admitted;
 
