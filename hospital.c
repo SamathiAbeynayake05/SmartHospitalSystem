@@ -74,8 +74,30 @@ double calculateSurcharge(int urgencyLevel, double baseFee) {
     if (urgencyLevel == 3) return baseFee * 0.50;
     return 0.0;
 }
+/* Requirement 3.3: Total Ward Stay Cost = Days Admitted * Ward Daily Rate (0 if not admitted) */
+double calculateWardCost(int daysAdmitted, int wardIdx) {
+    if (wardIdx < 0) return 0.0;
+    return daysAdmitted * wardDailyRate[wardIdx];
+}
+
+/* Requirement 3.4: Gross Total = Base Fee + Surcharge + Ward Cost */
+double calculateGrossTotal(double baseFee, double surcharge, double wardCost) {
+    return baseFee + surcharge + wardCost;
+}
+
+/* Requirement 3.5: Age Subsidy Discount - 15% if age < 5 or age > 65 */
+double calculateDiscount(int age, double grossTotal) {
+    if (age < 5 || age > 65) return grossTotal * 0.15;
+    return 0.0;
+}
+
+/* Requirement 3.6: Final Payable Amount = Gross Total - Discount */
+double calculateFinalAmount(double grossTotal, double discount) {
+    return grossTotal - discount;
+}
 void registerPatient(void) {
     int idx, specialtyChoice, wardChoice, admitted;
+
 
     if (patientCount >= MAX_PATIENTS) {
         printf("Patient limit reached. Cannot register more patients.\n");
@@ -133,13 +155,17 @@ void registerPatient(void) {
         patientBedNumber[idx] = -1;
         patientDaysAdmitted[idx] = 0;
     }
-        patientWaitTime[idx]  = calculateWaitTime(patientSpecialtyIdx[idx]);
-    patientBaseFee[idx]   = specialtyBaseFee[patientSpecialtyIdx[idx]];
-    patientSurcharge[idx] = calculateSurcharge(patientUrgency[idx], patientBaseFee[idx]);
+      patientWaitTime[idx]    = calculateWaitTime(patientSpecialtyIdx[idx]);
+    patientBaseFee[idx]     = specialtyBaseFee[patientSpecialtyIdx[idx]];
+    patientSurcharge[idx]   = calculateSurcharge(patientUrgency[idx], patientBaseFee[idx]);
+    patientWardCost[idx]    = calculateWardCost(patientDaysAdmitted[idx], patientWardIdx[idx]);
+    patientGrossTotal[idx]  = calculateGrossTotal(patientBaseFee[idx], patientSurcharge[idx], patientWardCost[idx]);
+    patientDiscount[idx]    = calculateDiscount(patientAge[idx], patientGrossTotal[idx]);
+    patientFinalAmount[idx] = calculateFinalAmount(patientGrossTotal[idx], patientDiscount[idx]);
 
     /* Increment queue count AFTER calculating wait time, per spec */
     specialtyQueueCount[patientSpecialtyIdx[idx]]++;
     patientCount++;
-
+    printf("Final Amount: %.2f\n", patientFinalAmount[idx]);
     printf("\nPatient registered. (Bed assignment and billing come in the next steps.)\n");
 }
