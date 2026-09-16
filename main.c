@@ -18,8 +18,8 @@ int main(void) {
     viewBedOccupancy();
     break;
             case 3:
-                printf("\n[View Sorted Patients - not implemented yet]\n");
-                break;
+    viewSortedPatients();
+    break;
             case 4:
                 printf("\n[Generate Reports - not implemented yet]\n");
                 break;

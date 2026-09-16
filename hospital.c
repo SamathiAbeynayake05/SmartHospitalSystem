@@ -163,6 +163,49 @@ void viewBedOccupancy(void) {
     }
     printf("================================================\n");
 }
+/* Requirement 4: priority sort - fills an index array 'order' rather than
+   moving the patient arrays themselves, so registration order stays intact
+   as a natural tie-breaker. Bubble sort is stable, so equal urgency levels
+   keep their original registration order automatically. */
+void sortPatientsByPriority(int order[]) {
+    int i, j, temp;
+
+    for (i = 0; i < patientCount; i++) order[i] = i; /* start in registration order */
+
+    for (i = 0; i < patientCount - 1; i++) {
+        for (j = 0; j < patientCount - 1 - i; j++) {
+            if (patientUrgency[order[j]] < patientUrgency[order[j + 1]]) {
+                temp = order[j];
+                order[j] = order[j + 1];
+                order[j + 1] = temp;
+            }
+        }
+    }
+}
+
+/* Displays patients ordered by the sort above: Level 3 (Critical) first,
+   then Level 2, then Level 1 - registration order preserved within each level */
+void viewSortedPatients(void) {
+    int order[MAX_PATIENTS];
+    int i;
+
+    if (patientCount == 0) {
+        printf("\nNo patients registered yet.\n");
+        return;
+    }
+
+    sortPatientsByPriority(order);
+
+    printf("\n============ PATIENTS BY PRIORITY ============\n");
+    printf("%-10s %-20s %-18s %-15s\n", "Pat ID", "Name", "Urgency", "Final Bill (LKR)");
+    for (i = 0; i < patientCount; i++) {
+        int idx = order[i];
+        printf("PAT-%-6d %-20s %-18s %.2f\n",
+               1000 + idx + 1, patientName[idx], urgencyLabel(patientUrgency[idx]),
+               patientFinalAmount[idx]);
+    }
+    printf("================================================\n");
+}
 void registerPatient(void) {
     int idx, specialtyChoice, wardChoice, admitted;
 
