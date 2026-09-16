@@ -21,8 +21,8 @@ int main(void) {
     viewSortedPatients();
     break;
             case 4:
-                printf("\n[Generate Reports - not implemented yet]\n");
-                break;
+    generateReports();
+    break;
             case 5:
                 printf("\nGoodbye!\n");
                 break;

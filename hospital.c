@@ -206,6 +206,51 @@ void viewSortedPatients(void) {
     }
     printf("================================================\n");
 }
+/* Requirement 6: performance & analytics report */
+void generateReports(void) {
+    int i, w;
+    int countByUrgency[4] = {0, 0, 0, 0}; /* index 1,2,3 used; 0 unused */
+    double totalRevenue = 0, totalDiscount = 0;
+    int topPatientIdx = -1;
+    double topAmount = -1;
+
+    if (patientCount == 0) {
+        printf("\nNo patients registered yet. Nothing to report.\n");
+        return;
+    }
+
+    for (i = 0; i < patientCount; i++) {
+        countByUrgency[patientUrgency[i]]++;
+        totalRevenue  += patientFinalAmount[i];
+        totalDiscount += patientDiscount[i];
+        if (patientFinalAmount[i] > topAmount) {
+            topAmount = patientFinalAmount[i];
+            topPatientIdx = i;
+        }
+    }
+
+    printf("\n============ PERFORMANCE REPORT ============\n");
+    printf("Total Patients Registered : %d\n", patientCount);
+    printf("  Level 1 (Normal)  : %d\n", countByUrgency[1]);
+    printf("  Level 2 (Urgent)  : %d\n", countByUrgency[2]);
+    printf("  Level 3 (Critical): %d\n", countByUrgency[3]);
+    printf("\nTotal Revenue Earned      : LKR %.2f\n", totalRevenue);
+    printf("Total Discounts Granted   : LKR %.2f\n", totalDiscount);
+
+    printf("\nBed Occupancy Percentage per Ward:\n");
+    for (w = 0; w < NUM_WARDS; w++) {
+        int occupied = 0, b;
+        for (b = 0; b < wardCapacity[w]; b++)
+            if (bedOccupancy[w][b] == 1) occupied++;
+        printf("  %-28s: %.1f%%\n", wardName[w], (occupied * 100.0) / wardCapacity[w]);
+    }
+
+    if (topPatientIdx != -1) {
+        printf("\nHighest-Paying Patient    : %s (PAT-%d) - LKR %.2f\n",
+               patientName[topPatientIdx], 1000 + topPatientIdx + 1, topAmount);
+    }
+    printf("================================================\n");
+}
 void registerPatient(void) {
     int idx, specialtyChoice, wardChoice, admitted;
 
