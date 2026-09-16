@@ -33,13 +33,13 @@
 		</Compiler>
 		<Unit filename="hospital.c">
 			<Option compilerVar="CC" />
-			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="hospital.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
 		</Unit>
 		<Extensions>
 			<lib_finder disable_auto="1" />

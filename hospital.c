@@ -369,9 +369,13 @@ void registerPatient(void) {
     printf("\nAvailable Specialties:\n");
     for (int i = 0; i < NUM_SPECIALTIES; i++)
         printf("  %d. %s (LKR %.2f)\n", i + 1, specialtyName[i], specialtyBaseFee[i]);
-    specialtyChoice = getValidatedInt("Select Specialty ID (1-4): ", 1, NUM_SPECIALTIES);
+        specialtyChoice = getValidatedInt("Select Specialty ID (1-4): ", 1, NUM_SPECIALTIES);
     patientSpecialtyIdx[idx] = specialtyChoice - 1;
 
+    if (specialtyQueueCount[patientSpecialtyIdx[idx]] >= specialtyDailyCap[patientSpecialtyIdx[idx]]) {
+        printf("\nNote: %s has reached its daily patient cap of %d. Registering anyway (overflow).\n",
+               specialtyName[patientSpecialtyIdx[idx]], specialtyDailyCap[patientSpecialtyIdx[idx]]);
+    }
     admitted = getValidatedInt("Is Admitted to Ward? (1 = Yes, 0 = No): ", 0, 1);
     patientIsAdmitted[idx] = admitted;
 
