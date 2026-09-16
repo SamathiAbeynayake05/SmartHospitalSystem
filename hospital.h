@@ -51,6 +51,9 @@ extern int patientCount; /* number of patients registered so far */
 
 // FUNCTION DECLARATIONS
 
+/* Input validation helper (new) */
+int getValidatedInt(const char *prompt, int min, int max);
+
 /* Setup / persistence */
 void initializeBeds(void);
 void loadBedStatus(void);

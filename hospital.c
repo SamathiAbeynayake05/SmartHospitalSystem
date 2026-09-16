@@ -39,6 +39,35 @@ double patientWaitTime[MAX_PATIENTS];
 
 int patientCount = 0;
 
+/* ================= INPUT VALIDATION (new) =================
+   Keeps re-prompting until the user types a whole number within [min, max].
+   Handles two failure cases:
+   1. Non-numeric input (e.g. "h") - scanf fails and leaves it in the buffer.
+   2. Numeric but out-of-range input (e.g. 9 when only 1-4 are valid).
+   Either way, it clears the rest of the input line before retrying, so a
+   bad character never leaks into the next read (this is what was crashing
+   the program before). */
+int getValidatedInt(const char *prompt, int min, int max) {
+    int value;
+    int result;
+    int c;
+
+    while (1) {
+        printf("%s", prompt);
+        result = scanf("%d", &value);
+
+        /* Clear everything left on this input line, valid or not - this
+           is what protects the NEXT scanf/fgets from leftover garbage */
+        while ((c = getchar()) != '\n' && c != EOF)
+            ;
+
+        if (result == 1 && value >= min && value <= max) {
+            return value;
+        }
+        printf("Invalid input. Please enter a whole number between %d and %d.\n", min, max);
+    }
+}
+
 void showMainMenu(void) {
     printf("\n============ SMART HOSPITAL SYSTEM ============\n");
     printf("1. Register New Patient\n");
@@ -47,7 +76,6 @@ void showMainMenu(void) {
     printf("4. Generate Performance Reports\n");
     printf("5. Save & Exit\n");
     printf("=================================================\n");
-    printf("Enter your choice: ");
 }
 
 /* Finds first free bed in the given ward, marks it occupied, returns its index (0-based).
@@ -62,6 +90,7 @@ int assignBed(int wardIdx) {
     }
     return -1;
 }
+
 /* Requirement 3.1: Wait Time = current queue count for this specialty * avg time per patient.
    Uses the count BEFORE this patient is added, so the first patient always waits 0 mins. */
 double calculateWaitTime(int specialtyIdx) {
@@ -74,6 +103,7 @@ double calculateSurcharge(int urgencyLevel, double baseFee) {
     if (urgencyLevel == 3) return baseFee * 0.50;
     return 0.0;
 }
+
 /* Requirement 3.3: Total Ward Stay Cost = Days Admitted * Ward Daily Rate (0 if not admitted) */
 double calculateWardCost(int daysAdmitted, int wardIdx) {
     if (wardIdx < 0) return 0.0;
@@ -146,6 +176,7 @@ void displayBill(int idx) {
         printf("Estimated Waiting Time: %.2f mins\n", patientWaitTime[idx]);
     printf("====================================================\n\n");
 }
+
 /* Requirement 1: display the bed occupancy matrix */
 void viewBedOccupancy(void) {
     int w, b, occupied;
@@ -163,6 +194,7 @@ void viewBedOccupancy(void) {
     }
     printf("================================================\n");
 }
+
 /* Requirement 4: priority sort - fills an index array 'order' rather than
    moving the patient arrays themselves, so registration order stays intact
    as a natural tie-breaker. Bubble sort is stable, so equal urgency levels
@@ -206,6 +238,7 @@ void viewSortedPatients(void) {
     }
     printf("================================================\n");
 }
+
 /* Requirement 6: performance & analytics report */
 void generateReports(void) {
     int i, w;
@@ -251,9 +284,67 @@ void generateReports(void) {
     }
     printf("================================================\n");
 }
+
+/* Requirement 7: load bed status from file if it exists, else start with all beds empty */
+void loadBedStatus(void) {
+    FILE *fp = fopen(BEDS_FILE, "r");
+    int w, b, status;
+
+    /* start clean first, in case the file is missing or incomplete */
+    for (w = 0; w < NUM_WARDS; w++)
+        for (b = 0; b < MAX_BEDS_PER_WARD; b++)
+            bedOccupancy[w][b] = 0;
+
+    if (fp == NULL) {
+        printf("No previous bed status found. Starting fresh.\n");
+        return;
+    }
+    for (w = 0; w < NUM_WARDS; w++) {
+        for (b = 0; b < wardCapacity[w]; b++) {
+            if (fscanf(fp, "%d", &status) == 1) {
+                bedOccupancy[w][b] = status;
+            }
+        }
+    }
+    fclose(fp);
+    printf("Bed status loaded from %s\n", BEDS_FILE);
+}
+
+/* Saves the current bed occupancy matrix to file so it survives program restarts */
+void saveBedStatus(void) {
+    FILE *fp = fopen(BEDS_FILE, "w");
+    int w, b;
+
+    if (fp == NULL) {
+        printf("Error: could not save bed status.\n");
+        return;
+    }
+    for (w = 0; w < NUM_WARDS; w++) {
+        for (b = 0; b < wardCapacity[w]; b++) {
+            fprintf(fp, "%d ", bedOccupancy[w][b]);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+}
+
+/* Appends a permanent billing log line for one patient - never overwrites old records */
+void appendPatientRecord(int idx) {
+    FILE *fp = fopen(RECORDS_FILE, "a");
+    if (fp == NULL) {
+        printf("Error: could not write patient record.\n");
+        return;
+    }
+    fprintf(fp, "PAT-%d | %s | Age:%d | Urgency:%d | Specialty:%s | Final:LKR %.2f\n",
+            1000 + idx + 1, patientName[idx], patientAge[idx], patientUrgency[idx],
+            specialtyName[patientSpecialtyIdx[idx]], patientFinalAmount[idx]);
+    fclose(fp);
+}
+
+/* Requirement 2: patient intake, now using getValidatedInt() for every numeric field
+   so a mis-typed letter can never crash or corrupt the registration anymore. */
 void registerPatient(void) {
     int idx, specialtyChoice, wardChoice, admitted;
-
 
     if (patientCount >= MAX_PATIENTS) {
         printf("Patient limit reached. Cannot register more patients.\n");
@@ -262,38 +353,36 @@ void registerPatient(void) {
     idx = patientCount;
 
     printf("\n--- New Patient Registration ---\n");
-    printf("Patient Name: ");
-    getchar(); /* clears leftover newline sitting in the input buffer from the menu's scanf */
-    fgets(patientName[idx], NAME_LEN, stdin);
-    patientName[idx][strcspn(patientName[idx], "\n")] = '\0'; /* strip the trailing newline fgets keeps */
 
-    printf("Patient Age: ");
-    scanf("%d", &patientAge[idx]);
+    /* Name: keep re-prompting until something non-empty is typed */
+    do {
+        printf("Patient Name: ");
+        fgets(patientName[idx], NAME_LEN, stdin);
+        patientName[idx][strcspn(patientName[idx], "\n")] = '\0'; /* strip trailing newline */
+        if (strlen(patientName[idx]) == 0)
+            printf("Name cannot be empty.\n");
+    } while (strlen(patientName[idx]) == 0);
 
-    printf("Triage Level (1 = Normal, 2 = Urgent, 3 = Critical): ");
-    scanf("%d", &patientUrgency[idx]);
+    patientAge[idx]    = getValidatedInt("Patient Age (0-120): ", 0, 120);
+    patientUrgency[idx] = getValidatedInt("Triage Level (1 = Normal, 2 = Urgent, 3 = Critical): ", 1, 3);
 
     printf("\nAvailable Specialties:\n");
     for (int i = 0; i < NUM_SPECIALTIES; i++)
         printf("  %d. %s (LKR %.2f)\n", i + 1, specialtyName[i], specialtyBaseFee[i]);
-    printf("Select Specialty ID (1-4): ");
-    scanf("%d", &specialtyChoice);
+    specialtyChoice = getValidatedInt("Select Specialty ID (1-4): ", 1, NUM_SPECIALTIES);
     patientSpecialtyIdx[idx] = specialtyChoice - 1;
 
-    printf("Is Admitted to Ward? (1 = Yes, 0 = No): ");
-    scanf("%d", &admitted);
+    admitted = getValidatedInt("Is Admitted to Ward? (1 = Yes, 0 = No): ", 0, 1);
     patientIsAdmitted[idx] = admitted;
 
     if (admitted == 1) {
         printf("\nAvailable Wards:\n");
         for (int i = 0; i < NUM_WARDS; i++)
             printf("  %d. %s (LKR %.2f/day)\n", i + 1, wardName[i], wardDailyRate[i]);
-        printf("Select Ward ID (1-4): ");
-        scanf("%d", &wardChoice);
+        wardChoice = getValidatedInt("Select Ward ID (1-4): ", 1, NUM_WARDS);
         patientWardIdx[idx] = wardChoice - 1;
 
-        printf("Days Admitted: ");
-        scanf("%d", &patientDaysAdmitted[idx]);
+        patientDaysAdmitted[idx] = getValidatedInt("Days Admitted (1-365): ", 1, 365);
 
         int bedIdx = assignBed(patientWardIdx[idx]);
         if (bedIdx == -1) {
@@ -311,7 +400,8 @@ void registerPatient(void) {
         patientBedNumber[idx] = -1;
         patientDaysAdmitted[idx] = 0;
     }
-      patientWaitTime[idx]    = calculateWaitTime(patientSpecialtyIdx[idx]);
+
+    patientWaitTime[idx]    = calculateWaitTime(patientSpecialtyIdx[idx]);
     patientBaseFee[idx]     = specialtyBaseFee[patientSpecialtyIdx[idx]];
     patientSurcharge[idx]   = calculateSurcharge(patientUrgency[idx], patientBaseFee[idx]);
     patientWardCost[idx]    = calculateWardCost(patientDaysAdmitted[idx], patientWardIdx[idx]);
@@ -325,3 +415,7 @@ void registerPatient(void) {
 
     printf("\n");
     displayBill(idx);
+
+    appendPatientRecord(idx);
+    saveBedStatus();
+}
