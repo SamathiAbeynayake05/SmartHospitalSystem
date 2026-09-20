@@ -1,3 +1,10 @@
-PAT-1001 | gh | Age:50 | Urgency:1 | Specialty:General Practice (OPD) | Final:LKR 1500.00
-PAT-1001 | Samathi Abeynayake | Age:20 | Urgency:3 | Specialty:Cardiology | Final:LKR 56750.00
+
 PAT-1001 | K chansi | Age:22 | Urgency:1 | Specialty:General Practice (OPD) | Final:LKR 4500.00
+PAT-1002 | shreya | Age:30 | Urgency:3 | Specialty:Cardiology | Final:LKR 15750.00
+PAT-1003 | Sama | Age:23 | Urgency:1 | Specialty:General Practice (OPD) | Final:LKR 10500.00
+PAT-1004 | Kreya | Age:2 | Urgency:3 | Specialty:Neurology | Final:LKR 48875.00
+PAT-1005 | JOHN | Age:23 | Urgency:3 | Specialty:Neurology | Final:LKR 132500.00
+PAT-1006 | Mackrina John | Age:3 | Urgency:3 | Specialty:Cardiology | Final:LKR 111987.50
+PAT-1007 | helia | Age:2 | Urgency:3 | Specialty:Cardiology | Final:LKR 90737.50
+PAT-1008 | Sesha | Age:54 | Urgency:3 | Specialty:Neurology | Final:LKR 7500.00
+PAT-1009 | Samathi Abeynayake | Age:20 | Urgency:3 | Specialty:Cardiology | Final:LKR 6750.00
