@@ -3,4 +3,5 @@ obj/
 *.depend
 *.layout
 *.exe
+*.o
 next_id.txt
