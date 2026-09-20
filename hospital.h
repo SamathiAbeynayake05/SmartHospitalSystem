@@ -10,6 +10,7 @@
 #define NAME_LEN          50
 #define BEDS_FILE         "beds_status.txt"
 #define RECORDS_FILE      "patient_records.txt"
+#define NEXT_ID_FILE      "next_id.txt"
 
 //LOOKUP DATA Requirement 1
 // Parallel arrays: index 0 -> Specialty ID 1, index 1 -> ID 2, etc.
@@ -28,7 +29,13 @@ extern int bedOccupancy[NUM_WARDS][MAX_BEDS_PER_WARD];
 /* Running queue count per specialty (Requirement 3.1) */
 extern int specialtyQueueCount[NUM_SPECIALTIES];
 
+/* Persistent patient ID counter - survives across program runs so IDs
+   never repeat, even across separate sessions (fixes duplicate PAT-1001
+   issue that would otherwise occur every time patientCount resets to 0) */
+extern int nextPatientId;
+
 /*  PATIENT PARALLEL ARRAYS Requirement 2  */
+extern int    patientID[MAX_PATIENTS];       /* the actual persistent ID assigned at registration */
 extern char   patientName[MAX_PATIENTS][NAME_LEN];
 extern int    patientAge[MAX_PATIENTS];
 extern int    patientUrgency[MAX_PATIENTS];      // 1,2,3
@@ -59,6 +66,8 @@ void initializeBeds(void);
 void loadBedStatus(void);
 void saveBedStatus(void);
 void appendPatientRecord(int idx);
+void loadNextPatientId(void);
+void saveNextPatientId(void);
 
 /* Menu / flow */
 void showMainMenu(void);

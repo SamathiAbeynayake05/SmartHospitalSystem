@@ -1,2 +1,3 @@
 PAT-1001 | gh | Age:50 | Urgency:1 | Specialty:General Practice (OPD) | Final:LKR 1500.00
 PAT-1001 | Samathi Abeynayake | Age:20 | Urgency:3 | Specialty:Cardiology | Final:LKR 56750.00
+PAT-1001 | K chansi | Age:22 | Urgency:1 | Specialty:General Practice (OPD) | Final:LKR 4500.00

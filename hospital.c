@@ -19,7 +19,10 @@ const int    wardCapacity[NUM_WARDS]  = {20, 10, 10, 5};
 int bedOccupancy[NUM_WARDS][MAX_BEDS_PER_WARD];
 int specialtyQueueCount[NUM_SPECIALTIES] = {0, 0, 0, 0};
 
+int nextPatientId = 1001; /* default starting ID if no next_id.txt exists yet */
+
 /*  PATIENT ARRAYS  */
+int    patientID[MAX_PATIENTS];
 char   patientName[MAX_PATIENTS][NAME_LEN];
 int    patientAge[MAX_PATIENTS];
 int    patientUrgency[MAX_PATIENTS];
@@ -39,7 +42,7 @@ double patientWaitTime[MAX_PATIENTS];
 
 int patientCount = 0;
 
-/* ================= INPUT VALIDATION (new) =================
+/*  INPUT VALIDATION
    Keeps re-prompting until the user types a whole number within [min, max].
    Handles two failure cases:
    1. Non-numeric input (e.g. "h") - scanf fails and leaves it in the buffer.
@@ -137,7 +140,7 @@ void displayBill(int idx) {
     printf("====================================================\n");
     printf(" SMART HOSPITAL ADMISSION & BILL\n");
     printf("----------------------------------------------------------------------------------------\n");
-    printf("Patient ID      : PAT-%d\n", 1000 + idx + 1);
+    printf("Patient ID      : PAT-%d\n", patientID[idx]);
     printf("Patient Name    : %s\n", patientName[idx]);
     if (patientAge[idx] < 5 || patientAge[idx] > 65)
         printf("Age             : %d Years (15%% Subsidy Eligible)\n", patientAge[idx]);
@@ -233,7 +236,7 @@ void viewSortedPatients(void) {
     for (i = 0; i < patientCount; i++) {
         int idx = order[i];
         printf("PAT-%-6d %-20s %-18s %.2f\n",
-               1000 + idx + 1, patientName[idx], urgencyLabel(patientUrgency[idx]),
+               patientID[idx], patientName[idx], urgencyLabel(patientUrgency[idx]),
                patientFinalAmount[idx]);
     }
     printf("================================================\n");
@@ -280,7 +283,7 @@ void generateReports(void) {
 
     if (topPatientIdx != -1) {
         printf("\nHighest-Paying Patient    : %s (PAT-%d) - LKR %.2f\n",
-               patientName[topPatientIdx], 1000 + topPatientIdx + 1, topAmount);
+               patientName[topPatientIdx], patientID[topPatientIdx], topAmount);
     }
     printf("================================================\n");
 }
@@ -336,8 +339,35 @@ void appendPatientRecord(int idx) {
         return;
     }
     fprintf(fp, "PAT-%d | %s | Age:%d | Urgency:%d | Specialty:%s | Final:LKR %.2f\n",
-            1000 + idx + 1, patientName[idx], patientAge[idx], patientUrgency[idx],
+            patientID[idx], patientName[idx], patientAge[idx], patientUrgency[idx],
             specialtyName[patientSpecialtyIdx[idx]], patientFinalAmount[idx]);
+    fclose(fp);
+}
+
+/* Loads the next patient ID to hand out, so IDs keep climbing across
+   separate program runs instead of restarting at 1001 every time */
+void loadNextPatientId(void) {
+    FILE *fp = fopen(NEXT_ID_FILE, "r");
+    int value;
+
+    if (fp == NULL) {
+        nextPatientId = 1001; /* first ever run */
+        return;
+    }
+    if (fscanf(fp, "%d", &value) == 1) {
+        nextPatientId = value;
+    }
+    fclose(fp);
+}
+
+/* Saves the next ID to hand out - called right after a new patient claims one */
+void saveNextPatientId(void) {
+    FILE *fp = fopen(NEXT_ID_FILE, "w");
+    if (fp == NULL) {
+        printf("Error: could not save next patient ID.\n");
+        return;
+    }
+    fprintf(fp, "%d\n", nextPatientId);
     fclose(fp);
 }
 
@@ -351,6 +381,9 @@ void registerPatient(void) {
         return;
     }
     idx = patientCount;
+    patientID[idx] = nextPatientId;
+    nextPatientId++;
+    saveNextPatientId();
 
     printf("\n--- New Patient Registration ---\n");
 
@@ -369,13 +402,9 @@ void registerPatient(void) {
     printf("\nAvailable Specialties:\n");
     for (int i = 0; i < NUM_SPECIALTIES; i++)
         printf("  %d. %s (LKR %.2f)\n", i + 1, specialtyName[i], specialtyBaseFee[i]);
-        specialtyChoice = getValidatedInt("Select Specialty ID (1-4): ", 1, NUM_SPECIALTIES);
+    specialtyChoice = getValidatedInt("Select Specialty ID (1-4): ", 1, NUM_SPECIALTIES);
     patientSpecialtyIdx[idx] = specialtyChoice - 1;
 
-    if (specialtyQueueCount[patientSpecialtyIdx[idx]] >= specialtyDailyCap[patientSpecialtyIdx[idx]]) {
-        printf("\nNote: %s has reached its daily patient cap of %d. Registering anyway (overflow).\n",
-               specialtyName[patientSpecialtyIdx[idx]], specialtyDailyCap[patientSpecialtyIdx[idx]]);
-    }
     admitted = getValidatedInt("Is Admitted to Ward? (1 = Yes, 0 = No): ", 0, 1);
     patientIsAdmitted[idx] = admitted;
 

@@ -6,6 +6,7 @@ int main(void) {
 
     printf("Smart Hospital Patient & Resource Allocation System\n");
     loadBedStatus();
+    loadNextPatientId();
 
     do {
         showMainMenu();
