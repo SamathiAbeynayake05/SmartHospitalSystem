@@ -43,5 +43,4 @@ See the full list in the project report PDF (Section 5), including:
 - Wait time uses the specialty's queue count *before* the current patient.
 - `MAX_PATIENTS` is capped at 100 (parallel array size).
 
-## Author
-Samathi Abeynayake — CSC1012, University of Sri Jayewardenepura
+
